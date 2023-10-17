@@ -20,6 +20,28 @@ class UiMainViewModel(
     val state: StateFlow<State> = _state
 
     private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
+
+    private val _events = MutableSharedFlow<Event>()
+    val events: SharedFlow<Event> = _events
+
+    private val _shouldFilterBreedTypes = MutableStateFlow(false)
+    val shouldFilterBreedTypes: StateFlow<Boolean> = _shouldFilterBreedTypes
+
+    val breeds =
+        breedsRepository.breeds.combine(shouldFilterBreedTypes) { breeds, shouldFilterBreedTypes ->
+            if (shouldFilterBreedTypes) {
+                breeds.filter { false }
+            } else {
+                breeds
+            }.also {
+                _state.value = if (it.isEmpty()) State.EMPTY else State.NORMAL
+            }
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(),
+            emptyList()
+        )
 
     init {
         loadData()
@@ -31,6 +53,7 @@ class UiMainViewModel(
 
         if (isForceRefresh) {
             _isRefreshing.value = true
+
         } else {
             _state.value = State.LOADING
         }
@@ -46,6 +69,9 @@ class UiMainViewModel(
         }
     }
 
+    fun refresh() {
+        loadData(true)
+    }
     enum class State {
         LOADING,
         NORMAL,
