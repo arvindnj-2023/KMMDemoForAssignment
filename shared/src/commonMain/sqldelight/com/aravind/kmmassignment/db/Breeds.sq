@@ -1,0 +1,16 @@
+CREATE TABLE breeds(
+    name TEXT NOT NULL,
+    imageUrl TEXT NOT NULL
+);
+
+insert:
+INSERT OR REPLACE INTO breeds(name, imageUrl) VALUES (?, ?);
+
+update:
+UPDATE breeds SET imageUrl = ? WHERE name = ?;
+
+selectAll:
+SELECT * FROM breeds;
+
+clear:
+DELETE FROM breeds;
